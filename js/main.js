@@ -1,17 +1,22 @@
-const API_URL = 'https://5hlcrueasj.execute-api.us-east-1.amazonaws.com/Dev';
-
-
 async function performSearch() {
     const query = document.getElementById('searchInput').value;
-    if (!query) return alert('Please enter a search term.');
+    if (!query) {
+        alert('Please enter a search term.');
+        return;
+    }
 
-    const url = `${API_URL}/search?q=${encodeURIComponent(query)}`;
     const resultsDiv = document.getElementById('photoGrid');
     resultsDiv.innerHTML = 'Searching...';
 
     try {
-        const response = await fetch(url);
-        const data = await response.json();
+        const params = {
+            q: query
+        };
+        const body = {};
+        const additionalParams = {};
+
+        const response = await sdk.searchGet(params, body, additionalParams);
+        const data = response.data;
 
         resultsDiv.innerHTML = '';
         if (data.results && data.results.length > 0) {
@@ -52,22 +57,60 @@ async function uploadPhoto() {
         return;
     }
 
-    const s3UploadUrl = `https://assignment3-photoalstorage.s3.us-east-1.amazonaws.com/${encodeURIComponent(file.name)}`;
+    const s3UploadUrl = `https://assignment3-photoalstorage.s3.amazonaws.com/${encodeURIComponent(file.name)}`;
+
     const headers = {
-        'x-amz-meta-customLabels': customLabels,
-        'Content-Type': file.type
+        'Content-Type': file.type,
+        'x-amz-meta-customLabels': customLabels 
     };
 
     try {
-        const response = await axios.put(s3UploadUrl, file, {
-            headers: headers
-        });
+        const response = await axios.put(s3UploadUrl, file, { headers });
+        console.log('Upload success:', response);
         alert('Photo uploaded successfully!');
     } catch (error) {
         console.error('Upload failed:', error);
         alert('Upload failed. Check console for more info.');
     }
 }
+
+
+async function uploadPhoto() {
+    const fileInput = document.getElementById('photoFile');
+    const labelsInput = document.getElementById('customLabels');
+    const file = fileInput.files[0];
+    let customLabels = labelsInput.value.trim();
+
+    if (!file) {
+        alert('Please choose a file to upload.');
+        return;
+    }
+
+    if (!customLabels) {
+        customLabels = ""; 
+    }
+
+    const params = {};
+
+    const body = file;
+
+    const additionalParams = {
+        headers: {
+            'Content-Type': file.type,
+            'x-amz-meta-customLabels': customLabels 
+        }
+    };
+
+    try {
+        const response = await sdk.photosPut(params, body, additionalParams);
+        alert('Photo uploaded successfully!');
+    } catch (error) {
+        console.error('Upload failed:', error);
+        alert('Upload failed. Check console for more info.');
+    }
+}
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('searchButton').addEventListener('click', performSearch);
