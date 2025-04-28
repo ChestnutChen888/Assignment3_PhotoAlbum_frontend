@@ -4,6 +4,7 @@ async function performSearch() {
         alert('Please enter a search term.');
         return;
     }
+    
 
     const resultsDiv = document.getElementById('photoGrid');
     resultsDiv.innerHTML = 'Searching...';
