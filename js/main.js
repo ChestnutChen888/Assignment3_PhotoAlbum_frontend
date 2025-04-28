@@ -1,5 +1,6 @@
 const API_URL = 'https://5hlcrueasj.execute-api.us-east-1.amazonaws.com/Dev';
 
+
 async function performSearch() {
     const query = document.getElementById('searchInput').value;
     if (!query) return alert('Please enter a search term.');
